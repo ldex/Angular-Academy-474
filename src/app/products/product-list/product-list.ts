@@ -1,80 +1,46 @@
-import { Component, Signal, signal, WritableSignal } from '@angular/core';
+import { Component, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { Product } from '../../models/product';
-import { CurrencyPipe, UpperCasePipe, NgClass } from '@angular/common';
-import { ProductDetails } from "../product-details/product-details";
+import { CurrencyPipe, SlicePipe, UpperCasePipe } from '@angular/common';
+import { ProductService } from '../product-service';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
-  imports: [UpperCasePipe, CurrencyPipe, ProductDetails, NgClass],
+  imports: [UpperCasePipe, CurrencyPipe, SlicePipe, RouterLink],
   templateUrl: './product-list.html',
   styleUrl: './product-list.css',
 })
-export class ProductList {
+export default class ProductList {
+
+  private productService = inject(ProductService);
+  private router = inject(Router);
+
+  private resource = this.productService.getProductsResource();
+
+  products: Signal<Product[]> = this.resource.value;
+  isLoading: Signal<boolean> = this.resource.isLoading;
+  error: Signal<Error | undefined> = this.resource.error;
 
   selectedProduct: WritableSignal<Product | null> = signal(null);
 
   select(product: Product) {
     this.selectedProduct.set(product);
+    this.router.navigate(['/products', product.id]);
   }
 
   title: Signal<string> = signal('Products');
 
-  products: Signal<Product[]> = signal([
-    {
-      id: 1,
-      name: 'Trek SSL 2026',
-      price: 1799.9,
-      description: 'Racing bike.',
-      discontinued: false,
-      fixedPrice: false,
-      imageUrl:
-        'https://raw.githubusercontent.com/ldex/angular-full-project/refs/heads/master/src/assets/images/trek.jpg',
-      modifiedDate: new Date(2026, 12, 8),
-    },
-    {
-      id: 2,
-      name: 'City XT 2025',
-      price: 1659.5,
-      description: 'City bike.',
-      discontinued: true,
-      fixedPrice: false,
-      imageUrl:
-        'https://raw.githubusercontent.com/ldex/angular-full-project/refs/heads/master/src/assets/images/city.jpg',
-      modifiedDate: new Date(2025, 1, 12),
-    },
-    {
-      id: 3,
-      name: 'Cosmic Cobat 2025',
-      price: 1499.9,
-      description: 'Great bike.',
-      discontinued: false,
-      fixedPrice: false,
-      imageUrl:
-        'https://raw.githubusercontent.com/ldex/angular-full-project/refs/heads/master/src/assets/images/cosmic-cobat.jpg',
-      modifiedDate: new Date(2025, 1, 2),
-    },
-    {
-      id: 4,
-      name: 'Hero DTB 2025',
-      price: 1759,
-      description: "Champion's bike.",
-      discontinued: true,
-      fixedPrice: true,
-      imageUrl:
-        'https://raw.githubusercontent.com/ldex/angular-full-project/refs/heads/master/src/assets/images/hero-dtb.jpg',
-      modifiedDate: new Date(2025, 1, 24),
-    },
-    {
-      id: 5,
-      name: 'S-WORKS 2026',
-      price: 1999.9,
-      description: 'Ultra bike.',
-      discontinued: false,
-      fixedPrice: false,
-      imageUrl:
-        'https://raw.githubusercontent.com/ldex/angular-full-project/refs/heads/master/src/assets/images/s-works.jpg',
-      modifiedDate: new Date(2026, 1, 19),
-    },
-  ]);
+  // Pagination
+  pageSize = signal(5);
+  start = signal(0);
+  end = signal(this.pageSize());
+  pageNumber = signal(1);
+
+  changePage(increment: number): void {
+    this.start.update((start) => start + increment * this.pageSize());
+    this.end.set(this.start() + this.pageSize());
+    this.pageNumber.update((pageNumber) => pageNumber + increment);
+    this.selectedProduct.set(null);
+  }
 
 }
