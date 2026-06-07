@@ -13,7 +13,7 @@ export class ApiService {
   private http = inject(HttpClient);
 
   loadProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.baseUrl).pipe(delay(1500)); // Simulate network delay
+    return this.http.get<Product[]>(this.baseUrl);
   }
 
   loadProduct(id: number): Observable<Product> {

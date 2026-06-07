@@ -45,15 +45,15 @@ export class ProductService {
     });
   }
 
-  private loadProducts() {
-    this.apiService.loadProducts().subscribe((data) => {
-      this.products.set(data);
-    });
-  }
+  // private loadProducts() {
+  //   this.apiService.loadProducts().subscribe((data) => {
+  //     this.products.set(data);
+  //   });
+  // }
 
-  getProducts() {
-    this.loadProducts();
-    return this.products.asReadonly();
-  }
+  // getProducts() {
+  //   this.loadProducts();
+  //   return this.products.asReadonly();
+  // }
 
 }
